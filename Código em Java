@@ -1,0 +1,170 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Board {
+    private Connection connection;
+    private Scanner scanner;
+
+    public Board() {
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql:                                          
+        } catch (SQLException e) {
+            System.out.println("//localhost:3306/board", "root", "senha");
+        } catch (SQLException e) {
+            System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
+        }
+        scanner = new Scanner(System.in);
+    }
+
+    public void menu() {
+        while (true) {
+            System.out.println("Menu:");
+            System.out.println("1. Criar novo board");
+            System.out.println("2. Selecionar board");
+            System.out.println("3. Excluir board");
+            System.out.print("Escolha uma opção: ");
+            int opcao = scanner.nextInt();
+            scanner.nextLine();                                      
+
+            switch (opcao) {
+                case 1:
+                    criarBoard();
+                    break;
+                case 2:
+                    selecionarBoard();
+                    break;
+                case 3:
+                    excluirBoard();
+                    break;
+                default:
+                    System.out.println("// Consumir o caractere de nova linha
+
+            switch (opcao) {
+                case 1:
+                    criarBoard();
+                    break;
+                case 2:
+                    selecionarBoard();
+                    break;
+                case 3:
+                    excluirBoard();
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+        }
+    }
+
+    private void criarBoard() {
+        System.out.print("Digite o nome do board: ");
+        String nome = scanner.nextLine();
+
+                                
+        List<Coluna> colunas = new ArrayList<>();
+        colunas.add(new Coluna("// Criar colunas padrão
+        List<Coluna> colunas = new ArrayList<>();
+        colunas.add(new Coluna("Inicial", 1, "Inicial"));
+        colunas.add(new Coluna("Pendente", 2, "Pendente"));
+        colunas.add(new Coluna("Final", 3, "Final"));
+
+                                         
+        try {
+            PreparedStatement statement = connection.prepareStatement("// Salvar board no banco de dados
+        try {
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO boards (nome) VALUES (?)");
+            statement.setString(1, nome);
+            statement.executeUpdate();
+
+                                         
+            ResultSet resultSet = statement.getGeneratedKeys();
+            int boardId = 0;
+            if (resultSet.next()) {
+                boardId = resultSet.getInt(1);
+            }
+
+                                               
+            for (Coluna coluna : colunas) {
+                statement = connection.prepareStatement("// Obter o ID do board criado
+            ResultSet resultSet = statement.getGeneratedKeys();
+            int boardId = 0;
+            if (resultSet.next()) {
+                boardId = resultSet.getInt(1);
+            }
+
+            // Salvar colunas no banco de dados
+            for (Coluna coluna : colunas) {
+                statement = connection.prepareStatement("INSERT INTO colunas (board_id, nome, ordem, tipo) VALUES (?, ?, ?, ?)");
+                statement.setInt(1, boardId);
+                statement.setString(2, coluna.getNome());
+                statement.setInt(3, coluna.getOrdem());
+                statement.setString(4, coluna.getTipo());
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao criar board: " + e.getMessage());
+        }
+    }
+
+    private void selecionarBoard() {
+        System.out.println("Selecione um board:");
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM boards");
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                System.out.println(resultSet.getInt("id") + ". " + resultSet.getString("nome"));
+            }
+
+            System.out.print("Digite o ID do board: ");
+            int boardId = scanner.nextInt();
+            scanner.nextLine();                                      
+
+                                               
+            Board board = new Board();
+            board.carregarBoard(boardId);
+        } catch (SQLException e) {
+            System.out.println("// Consumir o caractere de nova linha
+
+            // Carregar board do banco de dados
+            Board board = new Board();
+            board.carregarBoard(boardId);
+        } catch (SQLException e) {
+            System.out.println("Erro ao selecionar board: " + e.getMessage());
+        }
+    }
+
+    private void excluirBoard() {
+        System.out.println("Excluir board:");
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM boards");
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                System.out.println(resultSet.getInt("id") + ". " + resultSet.getString("nome"));
+            }
+
+            System.out.print("Digite o ID do board: ");
+            int boardId = scanner.nextInt();
+            scanner.nextLine();                                      
+
+                                              
+            statement = connection.prepareStatement("// Consumir o caractere de nova linha
+
+            // Excluir board do banco de dados
+            statement = connection.prepareStatement("DELETE FROM boards WHERE id = ?");
+            statement.setInt(1, boardId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erro ao excluir board: " + e.getMessage());
+        }
+    }
+
+    private void carregarBoard(int boardId) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM colunas WHERE board_id = (boardId)");
